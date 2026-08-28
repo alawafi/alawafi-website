@@ -81,6 +81,8 @@
     width:40px;height:40px;display:block;flex:0 0 auto;
     filter:drop-shadow(0 3px 6px rgba(0,0,0,.35));
   }
+  .logo-text{display:flex;flex-direction:column;line-height:1.18;}
+  .logo-sub{color:var(--gold);font-weight:400;font-size:.72em;}
   .nav-links{display:flex;gap:32px;align-items:center;}
   .nav-links a{color:rgba(255,255,255,.85);font-size:.92rem;font-weight:500;transition:color .2s;}
   .nav-links a:hover{color:var(--gold);}
@@ -88,8 +90,16 @@
     display:flex;align-items:center;gap:6px;font-size:.85rem;color:#fff;
     border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 14px;
   }
-  .burger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:0;padding:6px;}
+  .lang-switch-compact{
+    padding:6px 12px;font-size:.85rem;font-weight:700;min-width:34px;justify-content:center;
+  }
+  .burger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:0;padding:6px;flex:0 0 auto;}
   .burger span{width:24px;height:2px;background:#fff;border-radius:2px;}
+  @media(max-width:480px){
+    nav{padding:12px 16px;}
+    .logo{font-size:1.02rem;gap:8px;}
+    .logo .mark{width:34px;height:34px;}
+  }
 
   /* HERO */
   .hero{
@@ -291,6 +301,10 @@
     .burger{display:flex;}
     section{padding:64px 0;}
     .footer-links{gap:26px;}
+    .hero-eyebrow{margin-top:22px;}
+  }
+  @media(max-width:480px){
+    .hero-eyebrow{margin-top:30px;}
   }
 
   /* ---- social badges (real platform icons) ---- */
@@ -386,7 +400,7 @@
 <rect x="19" y="34" width="9" height="15" rx="1.5" fill="#a99cc0"/>
 <rect x="36" y="34" width="9" height="15" rx="1.5" fill="#a99cc0"/>
 <rect x="27.5" y="41" width="9" height="14" rx="4" fill="#ffffff"/>
-</svg> Al Awafi <span style="color:var(--gold);font-weight:400;font-size:.8em;">Real Estate</span></div>
+</svg><span class="logo-text">Al Awafi<span class="logo-sub">Real Estate</span></span></div>
     <div class="nav-links">
       <a href="#services">Services</a>
       <a href="#sell">List Your Property</a>
@@ -395,7 +409,7 @@
       <a href="#contact">Contact</a>
     </div>
     <div style="display:flex;align-items:center;gap:14px;">
-      <a class="lang-switch" href="index-ar.html" title="Switch to Arabic">🌐 العربية</a>
+      <a class="lang-switch lang-switch-compact" href="/" title="Switch to Arabic">ع</a>
       <button class="burger" onclick="document.querySelector('.nav-links').classList.toggle('mobile-open');this.classList.toggle('open')" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
@@ -406,7 +420,7 @@
 <section class="hero">
   <div class="container hero-grid">
     <div>
-      <div class="eyebrow" style="color:var(--gold);">Ras Al Khaimah · Property Specialists</div>
+      <div class="eyebrow hero-eyebrow" style="color:var(--gold);">Ras Al Khaimah · Property Specialists</div>
       <h1>We Sell Your Property. <span>Professionally, Start to Finish.</span></h1>
       <p class="lead">Al Awafi Real Estate LLC OPC represents property and land owners in Ras Al Khaimah, managing marketing, buyer qualification, viewings and negotiation through to a completed sale.</p>
       <div class="hero-actions">
