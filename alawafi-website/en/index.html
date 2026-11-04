@@ -1236,20 +1236,20 @@ document.getElementById('wizardForm').addEventListener('submit', async function(
   Object.keys(payload).forEach(k=>{ if(!payload[k] && !k.startsWith('_')) delete payload[k]; });
 
   try{
-    let res;
+    const fd = new FormData();
+    Object.keys(payload).forEach(k=>fd.append(k, payload[k]));
     if(state.attachedFiles && state.attachedFiles.length){
-      const fd = new FormData();
-      Object.keys(payload).forEach(k=>fd.append(k, payload[k]));
       state.attachedFiles.forEach((item, i)=>{ fd.append(item.label || ('attachment'+(i+1)), item.file); });
-      res = await fetch('https://formsubmit.co/ajax/alawafi.re@gmail.com', { method:'POST', headers:{ 'Accept':'application/json' }, body: fd });
-    } else {
-      res = await fetch('https://formsubmit.co/ajax/alawafi.re@gmail.com', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json', 'Accept':'application/json' },
-        body: JSON.stringify(payload)
-      });
     }
+    const res = await fetch('https://formsubmit.co/ajax/alawafi.re@gmail.com', {
+      method:'POST',
+      headers:{ 'Accept':'application/json' },
+      body: fd
+    });
     if(!res.ok) throw new Error('bad status');
+    let data = null;
+    try{ data = await res.json(); }catch(parseErr){ data = null; }
+    if(data && (data.success === false || data.success === 'false')) throw new Error('not confirmed');
     setActive(5);
   }catch(err){
     errText.style.display = 'block';
