@@ -865,7 +865,8 @@
               <div class="ic">✓</div>
               <h3>شكراً لك</h3>
               <p>تم استلام استفسارك. سيتواصل معك أحد أعضاء فريقنا قريباً. للرد الفوري، يُرجى التواصل معنا عبر واتساب.</p>
-              <a href="https://wa.me/971561789937" target="_blank" rel="noopener" class="btn btn-primary"><span class="wa-icon"></span> تواصل عبر واتساب</a>
+              <p id="sendFilesNote" style="display:none;color:var(--gold);font-weight:600;margin-top:4px;">لإكمال طلبك، يُرجى إرسال الصور/الملفات التي أرفقتها عبر واتساب — اضغط الزر أدناه.</p>
+              <a href="https://wa.me/971561789937" id="step5WaLink" target="_blank" rel="noopener" class="btn btn-primary"><span class="wa-icon"></span> تواصل عبر واتساب</a>
             </div>
           </div>
 
@@ -1219,16 +1220,22 @@ document.getElementById('wizardForm').addEventListener('submit', async function(
   const WEB3FORMS_ACCESS_KEY = 'ea22eab3-932f-4c46-821f-5fee40d20d9f';
 
   function buildFormData(){
+    // NOTE: Web3Forms' free plan rejects (400) any submission that includes a file —
+    // attachments are a paid-plan-only feature there. So text fields always go through
+    // Web3Forms (fast, reliable email delivery); any attached files are requested
+    // separately via WhatsApp right after a successful submission (see setActive(5) below
+    // and the "واتساب للصور/الملفات" note on the thank-you screen) rather than risking a
+    // 400 that would wrongly send the whole lead to the failure/WhatsApp fallback path.
     const fd = new FormData();
     fd.append('access_key', WEB3FORMS_ACCESS_KEY);
     fd.append('subject', 'طلب جديد — موقع العوافي للعقارات (AR)');
     fd.append('from_name', 'موقع العوافي للعقارات');
     if(state.email) fd.append('replyto', state.email);
     fd.append('botcheck', '');
-    Object.keys(payload).forEach(k=>fd.append(k, payload[k]));
     if(state.attachedFiles && state.attachedFiles.length){
-      state.attachedFiles.forEach((item)=>{ fd.append('attachment', item.file); });
+      payload['الملفات المرفقة'] = state.attachedFiles.length + ' ملف (سيتم إرسالها عبر واتساب)';
     }
+    Object.keys(payload).forEach(k=>fd.append(k, payload[k]));
     return fd;
   }
 
@@ -1262,6 +1269,15 @@ document.getElementById('wizardForm').addEventListener('submit', async function(
     if(!res.ok || !data || data.success !== true){
       console.error('Web3Forms submit failed', { status: res && res.status, data: data });
       throw new Error('bad response');
+    }
+    if(state.attachedFiles && state.attachedFiles.length){
+      const note = document.getElementById('sendFilesNote');
+      const step5Link = document.getElementById('step5WaLink');
+      if(note) note.style.display = 'block';
+      if(step5Link){
+        const waText = 'مرحباً، أرسلت طلباً قبل قليل من موقع العوافي للعقارات ولدي '+state.attachedFiles.length+' ملف/صور للعقار — إليكم:';
+        step5Link.href = 'https://wa.me/971561789937?text=' + encodeURIComponent(waText);
+      }
     }
     setActive(5);
   }catch(err){

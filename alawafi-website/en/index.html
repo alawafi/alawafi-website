@@ -883,7 +883,8 @@
               <div class="ic">✓</div>
               <h3>Thank You</h3>
               <p>Your enquiry has been received. A member of our team will contact you shortly. For an immediate response, please contact us on WhatsApp.</p>
-              <a href="https://wa.me/971561789937" target="_blank" rel="noopener" class="btn btn-primary"><span class="wa-icon"></span> Contact Us on WhatsApp</a>
+              <p id="sendFilesNote" style="display:none;color:var(--gold);font-weight:600;margin-top:4px;">To complete your request, please send the photo(s)/file(s) you attached via WhatsApp — tap the button below.</p>
+              <a href="https://wa.me/971561789937" id="step5WaLink" target="_blank" rel="noopener" class="btn btn-primary"><span class="wa-icon"></span> Contact Us on WhatsApp</a>
             </div>
           </div>
 
@@ -1238,16 +1239,23 @@ document.getElementById('wizardForm').addEventListener('submit', async function(
   const WEB3FORMS_ACCESS_KEY = 'ea22eab3-932f-4c46-821f-5fee40d20d9f';
 
   function buildFormData(){
+    // NOTE: Web3Forms' free plan rejects (400) any submission that includes a file —
+    // attachments are a paid-plan-only feature there. So text fields always go through
+    // Web3Forms (fast, reliable email delivery); any attached files are requested
+    // separately via WhatsApp right after a successful submission (see the success
+    // branch below and the "send files via WhatsApp" note on the thank-you screen)
+    // rather than risking a 400 that would wrongly send the whole lead down the
+    // failure/WhatsApp fallback path.
     const fd = new FormData();
     fd.append('access_key', WEB3FORMS_ACCESS_KEY);
     fd.append('subject', 'New Lead — Al Awafi Real Estate Website (EN)');
     fd.append('from_name', 'Al Awafi Real Estate website');
     if(state.email) fd.append('replyto', state.email);
     fd.append('botcheck', '');
-    Object.keys(payload).forEach(k=>fd.append(k, payload[k]));
     if(state.attachedFiles && state.attachedFiles.length){
-      state.attachedFiles.forEach((item)=>{ fd.append('attachment', item.file); });
+      payload['Attached files'] = state.attachedFiles.length + ' file(s) (will be sent via WhatsApp)';
     }
+    Object.keys(payload).forEach(k=>fd.append(k, payload[k]));
     return fd;
   }
 
@@ -1281,6 +1289,15 @@ document.getElementById('wizardForm').addEventListener('submit', async function(
     if(!res.ok || !data || data.success !== true){
       console.error('Web3Forms submit failed', { status: res && res.status, data: data });
       throw new Error('bad response');
+    }
+    if(state.attachedFiles && state.attachedFiles.length){
+      const note = document.getElementById('sendFilesNote');
+      const step5Link = document.getElementById('step5WaLink');
+      if(note) note.style.display = 'block';
+      if(step5Link){
+        const waText = 'Hi, I just sent a request from the Al Awafi Real Estate website and have '+state.attachedFiles.length+' file(s)/photo(s) for the property — here they are:';
+        step5Link.href = 'https://wa.me/971561789937?text=' + encodeURIComponent(waText);
+      }
     }
     setActive(5);
   }catch(err){
