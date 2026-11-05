@@ -1251,36 +1251,15 @@ document.getElementById('wizardForm').addEventListener('submit', async function(
     return fd;
   }
 
-  function buildWhatsAppUrl(filesWereDownloaded){
+  function buildWhatsAppUrl(){
     const lines = Object.keys(payload)
       .filter(k=>!k.startsWith('_'))
       .map(k=>k+': '+payload[k]);
-    let note = '';
-    if(state.attachedFiles && state.attachedFiles.length){
-      note = filesWereDownloaded
-        ? '\n(Note: '+state.attachedFiles.length+' file(s) from the form were saved to your device automatically — please attach them in this chat)'
-        : '\n(Note: '+state.attachedFiles.length+' file(s) were attached in the form — please send them here manually)';
-    }
+    const note = (state.attachedFiles && state.attachedFiles.length)
+      ? '\n(Note: '+state.attachedFiles.length+' file(s) were attached in the form — please send them here manually)'
+      : '';
     const text = 'New request from the Al Awafi Real Estate website:\n' + lines.join('\n') + note;
     return 'https://wa.me/971561789937?text=' + encodeURIComponent(text);
-  }
-
-  function downloadAttachedFiles(){
-    if(!state.attachedFiles || !state.attachedFiles.length) return false;
-    let ok = true;
-    state.attachedFiles.forEach((item, i)=>{
-      try{
-        const url = URL.createObjectURL(item.file);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = item.file.name || ((item.label || 'attachment'+(i+1)) + '');
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(()=>URL.revokeObjectURL(url), 10000);
-      }catch(dlErr){ ok = false; }
-    });
-    return ok;
   }
 
   function withTimeout(promise, ms){
@@ -1299,15 +1278,18 @@ document.getElementById('wizardForm').addEventListener('submit', async function(
     }), 8000);
     let data = null;
     try{ data = await res.json(); }catch(parseErr){ data = null; }
-    if(!res.ok || !data || data.success !== true) throw new Error('bad response');
+    if(!res.ok || !data || data.success !== true){
+      console.error('Web3Forms submit failed', { status: res && res.status, data: data });
+      throw new Error('bad response');
+    }
     setActive(5);
   }catch(err){
+    console.error('Form submission fell back to WhatsApp:', err);
     // Web3Forms is unreachable/failing (or the access key isn't set yet) — fall back to
     // WhatsApp so the lead is never lost, without navigating the visitor away from our
-    // own working page. Any attached files can't travel through a wa.me link, so save
-    // them to the visitor's device first.
-    const filesWereDownloaded = downloadAttachedFiles();
-    const waUrl = buildWhatsAppUrl(filesWereDownloaded);
+    // own working page. (Auto-downloading attached files on this path is disabled —
+    // the WhatsApp message just notes any files so they can be sent manually.)
+    const waUrl = buildWhatsAppUrl();
     const waLink = document.getElementById('waFallbackLink');
     if(waLink) waLink.href = waUrl;
     let opened = null;
