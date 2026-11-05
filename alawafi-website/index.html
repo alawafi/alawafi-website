@@ -1219,6 +1219,40 @@ document.getElementById('wizardForm').addEventListener('submit', async function(
   // to the key from https://web3forms.com for alawafi.re@gmail.com (free, instant signup).
   const WEB3FORMS_ACCESS_KEY = 'ea22eab3-932f-4c46-821f-5fee40d20d9f';
 
+  // Web3Forms' email renderer garbles non-ASCII (Arabic) FIELD NAMES in multipart/form-data
+  // (mojibake like "Ø£Ø±ÙŠØ¯" instead of "أريد") even though Arabic VALUES come through fine.
+  // So every field is sent under a plain-ASCII key here; the Arabic label still appears
+  // as the field's VALUE-side content isn't affected — only the key name changes for email
+  // readability. Order mirrors the payload above.
+  const FIELD_KEY_EN = {
+    "أريد": "I_want_to",
+    "نوع العقار": "Property_type",
+    "الموقع (رأس الخيمة)": "Location_RAK",
+    "المناطق المطلوب الشراء منها": "Areas_to_buy_in",
+    "مواصفات الموقع": "Location_specifications",
+    "عمر السكن": "Property_age",
+    "الغرض من الشراء": "Purpose_of_purchase",
+    "الهدف من الاستثمار": "Investment_goal",
+    "طريقة الشراء": "Purchase_method",
+    "العائد الاستثماري المتوقع": "Expected_investment_return",
+    "المناطق المطلوبة للاستئجار": "Areas_to_rent_in",
+    "مواصفات الموقع (إيجار)": "Location_specifications_rent",
+    "مدة الإيجار": "Lease_term",
+    "الغرض من الاستئجار": "Purpose_of_rental",
+    "توثيق العقد في البلدية": "Municipality_contract_notarization",
+    "ميزانية الإيجار التقديرية": "Estimated_rental_budget",
+    "المخطط (تقييم)": "Plan_valuation",
+    "الملكية (تقييم)": "Ownership_valuation",
+    "حالة رهن العقار": "Mortgage_status",
+    "حالة العقار": "Property_status",
+    "الإطار الزمني": "Timeline",
+    "الرسالة": "Message",
+    "الاسم": "Name",
+    "الهاتف / واتساب": "Phone_WhatsApp",
+    "البريد الإلكتروني": "Email",
+    "الملفات المرفقة": "Attached_files"
+  };
+
   function buildFormData(){
     // NOTE: Web3Forms' free plan rejects (400) any submission that includes a file —
     // attachments are a paid-plan-only feature there. So text fields always go through
@@ -1235,7 +1269,7 @@ document.getElementById('wizardForm').addEventListener('submit', async function(
     if(state.attachedFiles && state.attachedFiles.length){
       payload['الملفات المرفقة'] = state.attachedFiles.length + ' ملف (سيتم إرسالها عبر واتساب)';
     }
-    Object.keys(payload).forEach(k=>fd.append(k, payload[k]));
+    Object.keys(payload).forEach(k=>fd.append(FIELD_KEY_EN[k] || k, payload[k]));
     return fd;
   }
 
