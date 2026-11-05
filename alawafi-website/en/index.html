@@ -1228,18 +1228,25 @@ document.getElementById('wizardForm').addEventListener('submit', async function(
     "Message": state.message,
     "Name": state.name,
     "Phone / WhatsApp": state.phone,
-    "Email": state.email,
-    "_subject": "New Lead — Al Awafi Real Estate Website (EN)",
-    "_captcha": "false",
-    "_template": "table"
+    "Email": state.email
   };
-  Object.keys(payload).forEach(k=>{ if(!payload[k] && !k.startsWith('_')) delete payload[k]; });
+  Object.keys(payload).forEach(k=>{ if(!payload[k]) delete payload[k]; });
+
+  // Web3Forms — supports real file-attachment delivery by email (replaces FormSubmit.co,
+  // which went down with a Cloudflare 522 origin error). WEB3FORMS_ACCESS_KEY must be set
+  // to the key from https://web3forms.com for alawafi.re@gmail.com (free, instant signup).
+  const WEB3FORMS_ACCESS_KEY = 'YOUR_WEB3FORMS_ACCESS_KEY';
 
   function buildFormData(){
     const fd = new FormData();
+    fd.append('access_key', WEB3FORMS_ACCESS_KEY);
+    fd.append('subject', 'New Lead — Al Awafi Real Estate Website (EN)');
+    fd.append('from_name', 'Al Awafi Real Estate website');
+    if(state.email) fd.append('replyto', state.email);
+    fd.append('botcheck', '');
     Object.keys(payload).forEach(k=>fd.append(k, payload[k]));
     if(state.attachedFiles && state.attachedFiles.length){
-      state.attachedFiles.forEach((item, i)=>{ fd.append(item.label || ('attachment'+(i+1)), item.file); });
+      state.attachedFiles.forEach((item)=>{ fd.append('attachment', item.file); });
     }
     return fd;
   }
@@ -1284,20 +1291,21 @@ document.getElementById('wizardForm').addEventListener('submit', async function(
   }
 
   try{
-    const res = await withTimeout(fetch('https://formsubmit.co/ajax/alawafi.re@gmail.com', {
+    if(WEB3FORMS_ACCESS_KEY === 'YOUR_WEB3FORMS_ACCESS_KEY'){ throw new Error('access key not configured'); }
+    const res = await withTimeout(fetch('https://api.web3forms.com/submit', {
       method:'POST',
       headers:{ 'Accept':'application/json' },
       body: buildFormData()
     }), 8000);
-    if(!res.ok) throw new Error('bad status');
     let data = null;
     try{ data = await res.json(); }catch(parseErr){ data = null; }
-    if(data && (data.success === false || data.success === 'false')) throw new Error('not confirmed');
+    if(!res.ok || !data || data.success !== true) throw new Error('bad response');
     setActive(5);
   }catch(err){
-    // FormSubmit is unreachable/failing — fall back to WhatsApp so the lead is never lost,
-    // without navigating the visitor away from our own working page. Any attached files
-    // can't travel through a wa.me link, so save them to the visitor's device first.
+    // Web3Forms is unreachable/failing (or the access key isn't set yet) — fall back to
+    // WhatsApp so the lead is never lost, without navigating the visitor away from our
+    // own working page. Any attached files can't travel through a wa.me link, so save
+    // them to the visitor's device first.
     const filesWereDownloaded = downloadAttachedFiles();
     const waUrl = buildWhatsAppUrl(filesWereDownloaded);
     const waLink = document.getElementById('waFallbackLink');
