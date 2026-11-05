@@ -1216,27 +1216,98 @@ document.getElementById('wizardForm').addEventListener('submit', async function(
   };
   Object.keys(payload).forEach(k=>{ if(!payload[k] && !k.startsWith('_')) delete payload[k]; });
 
-  try{
+  function buildFormData(){
     const fd = new FormData();
     Object.keys(payload).forEach(k=>fd.append(k, payload[k]));
     if(state.attachedFiles && state.attachedFiles.length){
       state.attachedFiles.forEach((item, i)=>{ fd.append(item.label || ('مرفق '+(i+1)), item.file); });
     }
-    const res = await fetch('https://formsubmit.co/ajax/alawafi.re@gmail.com', {
+    return fd;
+  }
+
+  function fallbackNativeSubmit(){
+    try{
+      const form = document.createElement('form');
+      form.action = 'https://formsubmit.co/alawafi.re@gmail.com';
+      form.method = 'POST';
+      form.enctype = 'multipart/form-data';
+      form.style.display = 'none';
+      const nextUrl = window.location.origin + window.location.pathname + '?sent=1';
+      const fallbackPayload = Object.assign({}, payload, { "_next": nextUrl });
+      Object.keys(fallbackPayload).forEach(k=>{
+        const inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = k;
+        inp.value = fallbackPayload[k];
+        form.appendChild(inp);
+      });
+      if(state.attachedFiles && state.attachedFiles.length){
+        state.attachedFiles.forEach((item, i)=>{
+          const inp = document.createElement('input');
+          inp.type = 'file';
+          inp.name = item.label || ('مرفق '+(i+1));
+          try{
+            const dt = new DataTransfer();
+            dt.items.add(item.file);
+            inp.files = dt.files;
+          }catch(dtErr){ /* ignore, attachment best-effort on fallback path */ }
+          form.appendChild(inp);
+        });
+      }
+      document.body.appendChild(form);
+      form.submit();
+      return true;
+    }catch(fallbackErr){
+      return false;
+    }
+  }
+
+  function withTimeout(promise, ms){
+    return Promise.race([
+      promise,
+      new Promise((_, reject)=>setTimeout(()=>reject(new Error('timeout')), ms))
+    ]);
+  }
+
+  try{
+    const res = await withTimeout(fetch('https://formsubmit.co/ajax/alawafi.re@gmail.com', {
       method:'POST',
       headers:{ 'Accept':'application/json' },
-      body: fd
-    });
+      body: buildFormData()
+    }), 12000);
     if(!res.ok) throw new Error('bad status');
     let data = null;
     try{ data = await res.json(); }catch(parseErr){ data = null; }
     if(data && (data.success === false || data.success === 'false')) throw new Error('not confirmed');
     setActive(5);
   }catch(err){
-    errText.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'إرسال الطلب ✓';
+    const fellBack = fallbackNativeSubmit();
+    if(!fellBack){
+      errText.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'إرسال الطلب ✓';
+    }
+    // if fellBack is true, the browser is navigating away to FormSubmit now;
+    // nothing else to do on this page.
   }
 });
+
+(function(){
+  if(new URLSearchParams(window.location.search).get('sent') === '1'){
+    document.querySelectorAll('.wz-step').forEach(s=>s.classList.remove('active'));
+    const step5 = document.querySelector('.wz-step[data-step="5"]');
+    if(step5) step5.classList.add('active');
+    currentStep = 5;
+    for(let i=1;i<=4;i++){
+      const seg = document.getElementById('seg'+i);
+      if(seg) seg.style.width = '100%';
+    }
+    window.history.replaceState({}, document.title, window.location.pathname);
+    setTimeout(()=>{
+      const card = document.querySelector('.wizard-card');
+      if(card) card.scrollIntoView({behavior:'smooth', block:'center'});
+    }, 100);
+  }
+})();
 </script>
 </body>
 </html>
