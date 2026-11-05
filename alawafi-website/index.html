@@ -857,7 +857,7 @@
               <span class="spacer"></span>
               <button type="submit" class="btn btn-primary" id="submitBtn">إرسال الطلب</button>
             </div>
-            <p class="err-text" id="errText">حدث خطأ — يُرجى المحاولة عبر واتساب: 056 178 9937</p>
+            <p class="err-text" id="errText">تعذّر الإرسال التلقائي — تم تجهيز طلبك لإرساله عبر واتساب، <a id="waFallbackLink" href="#" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">اضغط هنا إذا لم يُفتح تلقائياً</a>.</p>
           </div>
 
           <div class="wz-step" data-step="5">
@@ -1225,41 +1225,36 @@ document.getElementById('wizardForm').addEventListener('submit', async function(
     return fd;
   }
 
-  function fallbackNativeSubmit(){
-    try{
-      const form = document.createElement('form');
-      form.action = 'https://formsubmit.co/alawafi.re@gmail.com';
-      form.method = 'POST';
-      form.enctype = 'multipart/form-data';
-      form.style.display = 'none';
-      const nextUrl = window.location.origin + window.location.pathname + '?sent=1';
-      const fallbackPayload = Object.assign({}, payload, { "_next": nextUrl });
-      Object.keys(fallbackPayload).forEach(k=>{
-        const inp = document.createElement('input');
-        inp.type = 'hidden';
-        inp.name = k;
-        inp.value = fallbackPayload[k];
-        form.appendChild(inp);
-      });
-      if(state.attachedFiles && state.attachedFiles.length){
-        state.attachedFiles.forEach((item, i)=>{
-          const inp = document.createElement('input');
-          inp.type = 'file';
-          inp.name = item.label || ('مرفق '+(i+1));
-          try{
-            const dt = new DataTransfer();
-            dt.items.add(item.file);
-            inp.files = dt.files;
-          }catch(dtErr){ /* ignore, attachment best-effort on fallback path */ }
-          form.appendChild(inp);
-        });
-      }
-      document.body.appendChild(form);
-      form.submit();
-      return true;
-    }catch(fallbackErr){
-      return false;
+  function buildWhatsAppUrl(filesWereDownloaded){
+    const lines = Object.keys(payload)
+      .filter(k=>!k.startsWith('_'))
+      .map(k=>k+': '+payload[k]);
+    let note = '';
+    if(state.attachedFiles && state.attachedFiles.length){
+      note = filesWereDownloaded
+        ? '\n(ملاحظة: تم حفظ '+state.attachedFiles.length+' ملف/ملفات من النموذج إلى جهازك تلقائياً — يُرجى إرفاقها في هذه المحادثة)'
+        : '\n(ملاحظة: يوجد '+state.attachedFiles.length+' ملف/ملفات مرفقة في النموذج، يُرجى إرسالها هنا يدوياً)';
     }
+    const text = 'طلب جديد من موقع العوافي للعقارات:\n' + lines.join('\n') + note;
+    return 'https://wa.me/971561789937?text=' + encodeURIComponent(text);
+  }
+
+  function downloadAttachedFiles(){
+    if(!state.attachedFiles || !state.attachedFiles.length) return false;
+    let ok = true;
+    state.attachedFiles.forEach((item, i)=>{
+      try{
+        const url = URL.createObjectURL(item.file);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = item.file.name || ((item.label || 'مرفق'+(i+1)) + '');
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url), 10000);
+      }catch(dlErr){ ok = false; }
+    });
+    return ok;
   }
 
   function withTimeout(promise, ms){
@@ -1274,20 +1269,28 @@ document.getElementById('wizardForm').addEventListener('submit', async function(
       method:'POST',
       headers:{ 'Accept':'application/json' },
       body: buildFormData()
-    }), 12000);
+    }), 8000);
     if(!res.ok) throw new Error('bad status');
     let data = null;
     try{ data = await res.json(); }catch(parseErr){ data = null; }
     if(data && (data.success === false || data.success === 'false')) throw new Error('not confirmed');
     setActive(5);
   }catch(err){
-    const fellBack = fallbackNativeSubmit();
-    if(!fellBack){
-      errText.style.display = 'block';
-      btn.disabled = false; btn.textContent = 'إرسال الطلب ✓';
+    // FormSubmit is unreachable/failing — fall back to WhatsApp so the lead is never lost,
+    // without navigating the visitor away from our own working page. Any attached files
+    // can't travel through a wa.me link, so save them to the visitor's device first.
+    const filesWereDownloaded = downloadAttachedFiles();
+    const waUrl = buildWhatsAppUrl(filesWereDownloaded);
+    const waLink = document.getElementById('waFallbackLink');
+    if(waLink) waLink.href = waUrl;
+    let opened = null;
+    try{ opened = window.open(waUrl, '_blank', 'noopener'); }catch(openErr){ opened = null; }
+    errText.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'إرسال الطلب ✓';
+    if(!opened){
+      // popup blocked — scroll the visible WhatsApp link into view so they can tap it
+      errText.scrollIntoView({behavior:'smooth', block:'center'});
     }
-    // if fellBack is true, the browser is navigating away to FormSubmit now;
-    // nothing else to do on this page.
   }
 });
 
