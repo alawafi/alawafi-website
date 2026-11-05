@@ -373,10 +373,72 @@
     .footer-top{flex-direction:column;}
     .hero-stats{gap:20px;}
   }
+
+  /* ================= ITology-inspired touches (restyle-in-place) ================= */
+  /* Scroll progress bar */
+  #scrollProgress{position:fixed;top:0;left:0;right:0;height:3px;z-index:1001;
+    background:linear-gradient(90deg,var(--gold),var(--purple-light));
+    transform:scaleX(0);transform-origin:right;will-change:transform;}
+  html[dir="ltr"] #scrollProgress{transform-origin:left;}
+
+  /* Animated grid-lines + glow orb layered over the hero photo */
+  .hero{isolation:isolate;}
+  .hero::after{
+    content:"";position:absolute;inset:0;z-index:-1;opacity:.35;pointer-events:none;
+    background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);
+    background-size:42px 42px;
+    -webkit-mask-image:linear-gradient(180deg,transparent,#000 35%,#000 75%,transparent);
+    mask-image:linear-gradient(180deg,transparent,#000 35%,#000 75%,transparent);
+    animation:gridDrift 22s linear infinite;
+  }
+  @keyframes gridDrift{from{background-position:0 0;}to{background-position:84px 84px;}}
+  .hero-orb{position:absolute;border-radius:50%;filter:blur(60px);z-index:-1;pointer-events:none;opacity:.55;animation:orbFloat 10s ease-in-out infinite alternate;}
+  .hero-orb.o1{width:320px;height:320px;background:radial-gradient(circle,rgba(201,162,75,.45),transparent 70%);top:8%;inset-inline-end:6%;}
+  .hero-orb.o2{width:260px;height:260px;background:radial-gradient(circle,rgba(138,92,196,.5),transparent 70%);bottom:4%;inset-inline-start:4%;animation-delay:-5s;}
+  @keyframes orbFloat{from{transform:translateY(0) scale(1);}to{transform:translateY(-22px) scale(1.06);}}
+  @media(max-width:640px){.hero::after,.hero-orb{display:none;}}
+
+  /* Reveal-on-scroll */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1);transition-delay:var(--d,0s);}
+  .reveal.visible{opacity:1;transform:translateY(0);}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none;}}
+
+  /* Cursor spotlight on cards */
+  @media(hover:hover){
+    .card,.process-steps .step,.contact-card{
+      background-image:radial-gradient(360px circle at var(--mx,-500px) var(--my,-500px),rgba(91,46,145,.08),transparent 45%);
+    }
+  }
+
+  /* Subtle shine sweep on primary buttons */
+  .btn-primary{overflow:hidden;}
+  .btn-primary::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);
+    transform:translateX(-120%);transition:transform .7s ease;}
+  .btn-primary:hover::after{transform:translateX(120%);}
+
+  /* Back-to-top */
+  #toTop{position:fixed;bottom:26px;inset-inline-end:26px;z-index:899;width:46px;height:46px;border-radius:50%;
+    background:rgba(23,21,27,.75);border:1px solid rgba(255,255,255,.25);color:#fff;display:flex;align-items:center;justify-content:center;
+    opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .3s,transform .3s,background .3s;backdrop-filter:blur(8px);}
+  #toTop.show{opacity:1;transform:translateY(0);pointer-events:auto;}
+  #toTop:hover{background:var(--purple);}
+  .float-wa{bottom:94px;}
+  @media(max-width:480px){#toTop{bottom:20px;width:40px;height:40px;} .float-wa{bottom:80px;}}
+
+  /* Eyebrow accent tick, like a section index mark */
+  .eyebrow{position:relative;padding-inline-start:16px;}
+  .eyebrow::before{content:"";position:absolute;inset-inline-start:0;top:50%;width:9px;height:9px;border-radius:50%;
+    background:var(--gold);transform:translateY(-50%);box-shadow:0 0 0 3px rgba(201,162,75,.25);}
+
+  /* Process steps: subtle glow pulse on the number badge when revealed */
+  .process-steps .step::before{transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .4s ease;}
+  .process-steps .step:hover::before{transform:scale(1.1);box-shadow:0 0 0 8px rgba(91,46,145,.12);}
 </style>
 </head>
 <body>
 
+<div id="scrollProgress"></div>
 <header id="siteHeader">
   <nav>
     <div class="logo"><svg class="mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Al Awafi Real Estate">
@@ -407,6 +469,7 @@
 </header>
 
 <section class="hero">
+  <span class="hero-orb o1"></span><span class="hero-orb o2"></span>
   <div class="container hero-grid">
     <div>
       <div class="eyebrow" style="color:var(--gold);">رأس الخيمة · متخصصون في العقارات</div>
@@ -979,6 +1042,7 @@
 </footer>
 
 <a class="float-wa" href="https://wa.me/971561789937" target="_blank" rel="noopener" title="تواصل عبر واتساب"><span class="wa-icon"></span></a>
+<button id="toTop" aria-label="العودة إلى الأعلى" title="العودة إلى الأعلى">↑</button>
 
 <script>
 document.getElementById('year').textContent = new Date().getFullYear();
@@ -986,6 +1050,49 @@ document.getElementById('year').textContent = new Date().getFullYear();
 window.addEventListener('scroll', function(){
   document.getElementById('siteHeader').classList.toggle('scrolled', window.scrollY > 30);
 });
+
+/* -------- ITology-inspired touches: scroll progress, reveal, spotlight, back-to-top -------- */
+(function(){
+  var progress = document.getElementById('scrollProgress');
+  var toTop = document.getElementById('toTop');
+  function onScroll2(){
+    var y = window.scrollY, h = document.documentElement.scrollHeight - window.innerHeight;
+    if(progress) progress.style.transform = 'scaleX(' + (h > 0 ? y / h : 0) + ')';
+    if(toTop) toTop.classList.toggle('show', y > 500);
+  }
+  window.addEventListener('scroll', onScroll2, {passive:true});
+  onScroll2();
+  if(toTop) toTop.addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
+
+  var revealSelectors = '.card, .process-steps .step, .contact-card, .hero-card, .section-head, .split > div, .why-strip .grid-4 > div';
+  var revealEls = Array.prototype.slice.call(document.querySelectorAll(revealSelectors));
+  revealEls.forEach(function(el){ el.classList.add('reveal'); });
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          var sibs = Array.prototype.filter.call(e.target.parentElement.children, function(c){ return c.classList.contains('reveal'); });
+          e.target.style.setProperty('--d', (Math.min(sibs.indexOf(e.target), 6) * 0.08) + 's');
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, {threshold:.12, rootMargin:'0px 0px -40px 0px'});
+    revealEls.forEach(function(el){ io.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add('visible'); });
+  }
+
+  if(window.matchMedia('(hover: hover)').matches){
+    document.addEventListener('pointermove', function(e){
+      var c = e.target.closest && e.target.closest('.card, .process-steps .step, .contact-card');
+      if(!c) return;
+      var r = c.getBoundingClientRect();
+      c.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    }, {passive:true});
+  }
+})();
 
 document.addEventListener('click', function(e){
   if(e.target.closest('.nav-links a')){
