@@ -64,7 +64,7 @@
   }
   .btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 34px -10px rgba(91,46,145,.7);background-position:100% 0%;}
   .btn-primary:active{transform:translateY(0) scale(.98);box-shadow:0 8px 18px -8px rgba(91,46,145,.6);}
-  .btn-ghost{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.35);}
+  .btn-ghost{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
   .btn-ghost:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.55);transform:translateY(-2px);}
   .btn-outline{background:transparent;color:var(--purple);border-color:var(--purple);}
   .btn-outline:hover{background:var(--purple);color:#fff;transform:translateY(-2px);box-shadow:0 12px 26px -10px rgba(91,46,145,.5);}
@@ -90,11 +90,12 @@
   /* NAV */
   header{
     position:fixed;top:0;left:0;right:0;z-index:1000;
-    background:rgba(20,15,30,.88);
+    background:rgba(20,15,30,.72);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     border-bottom:1px solid rgba(255,255,255,.08);
     transition:background .3s,border-color .3s;
   }
-  header.scrolled{background:rgba(20,15,30,.97);border-bottom-color:rgba(255,255,255,.12);}
+  header.scrolled{background:rgba(20,15,30,.88);border-bottom-color:rgba(255,255,255,.12);}
   nav{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;max-width:1180px;margin:0 auto;}
   .logo{display:flex;align-items:center;gap:10px;color:#fff;font-family:Georgia,serif;font-size:1.25rem;font-weight:700;}
   .logo .mark{
@@ -125,7 +126,7 @@
   /* HERO */
   .hero{
     position:relative;min-height:100vh;display:flex;align-items:center;
-    color:#fff;padding-top:90px;background:var(--navy-950);
+    color:#fff;padding-top:84px;padding-bottom:28px;background:var(--navy-950);
   }
   .hero::before{
     content:"";position:absolute;inset:0;
@@ -134,24 +135,25 @@
     background-size:cover;background-position:center;
     z-index:-1;
   }
-  .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:50px;align-items:center;position:relative;z-index:1;}
-  .hero h1{font-size:clamp(2.2rem,4.4vw,3.6rem);color:#fff;margin-bottom:22px;}
+  .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:36px;align-items:center;position:relative;z-index:1;}
+  .hero h1{font-size:clamp(1.9rem,3.6vw,3rem);color:#fff;margin-bottom:14px;line-height:1.15;}
   .hero h1 span{color:var(--gold);}
-  .hero p.lead{font-size:1.12rem;color:rgba(255,255,255,.88);max-width:560px;margin-bottom:34px;}
-  .hero-actions{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:40px;}
-  .hero-stats{display:flex;gap:36px;flex-wrap:wrap;}
+  .hero p.lead{font-size:1.02rem;color:rgba(255,255,255,.88);max-width:560px;margin-bottom:20px;}
+  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px;}
+  .hero-stats{display:flex;gap:28px;flex-wrap:wrap;}
   .hero-stats div{border-left:2px solid var(--gold);padding-left:14px;}
-  .hero-stats strong{display:block;font-size:1.5rem;font-family:Georgia,serif;}
-  .hero-stats span{font-size:.8rem;color:rgba(255,255,255,.65);}
+  .hero-stats strong{display:block;font-size:1.3rem;font-family:Georgia,serif;}
+  .hero-stats span{font-size:.78rem;color:rgba(255,255,255,.65);}
 
   .hero-card{
     background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);
-    border-radius:var(--radius-lg);padding:30px;color:#fff;
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border-radius:var(--radius-lg);padding:22px;color:#fff;
   }
-  .hero-card h3{font-size:1.2rem;margin-bottom:8px;}
-  .hero-card p{color:rgba(255,255,255,.8);font-size:.93rem;margin-bottom:18px;}
-  .hero-card ul{list-style:none;margin-bottom:20px;}
-  .hero-card li{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;font-size:.92rem;color:rgba(255,255,255,.9);}
+  .hero-card h3{font-size:1.08rem;margin-bottom:6px;}
+  .hero-card p{color:rgba(255,255,255,.8);font-size:.88rem;margin-bottom:12px;}
+  .hero-card ul{list-style:none;margin-bottom:14px;}
+  .hero-card li{display:flex;gap:9px;align-items:flex-start;margin-bottom:7px;font-size:.86rem;color:rgba(255,255,255,.9);}
   .hero-card li::before{content:"✓";flex:0 0 auto;color:var(--gold);font-weight:700;}
 
   /* SECTION HEADERS */
@@ -183,14 +185,15 @@
   .split h2{font-size:clamp(1.7rem,3vw,2.3rem);margin-bottom:18px;}
   .split p.desc{color:var(--grey-600);margin-bottom:24px;}
   .check-list{list-style:none;}
-  .check-list li{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;font-size:.98rem;color:var(--grey-800);}
+  .check-list li{display:flex;gap:14px;align-items:flex-start;margin-bottom:20px;font-size:.98rem;color:var(--grey-800);}
   .check-list li::before{
-    content:"";flex:0 0 22px;height:22px;width:22px;border-radius:50%;
-    background:linear-gradient(135deg,var(--purple),var(--gold));
-    background-image:none;position:relative;
+    content:"✓";flex:0 0 26px;width:26px;height:26px;border-radius:50%;
+    background:var(--purple);color:#fff;font-size:.78rem;font-weight:700;
+    display:flex;align-items:center;justify-content:center;margin-top:2px;
   }
-  .check-list li{position:relative;padding-left:0;}
+  .check-list li .ck-text{display:flex;flex-direction:column;gap:3px;}
   .check-list li b{color:var(--purple-dark);}
+  .check-list li .ck-sub{color:var(--grey-600);font-size:.92rem;}
   .badge-row{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap;}
   .badge{background:var(--bg-alt);border-radius:999px;padding:10px 20px;font-size:.85rem;font-weight:600;color:var(--grey-800);}
 
@@ -255,6 +258,7 @@
 
   .wizard-card{
     background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
     border-radius:var(--radius);padding:36px 32px;
   }
   .wz-step{display:none;animation:fade .35s ease;}
@@ -397,7 +401,8 @@
   .nav-links.mobile-open{
     display:flex !important;flex-direction:column;align-items:stretch;gap:0;
     position:absolute;top:100%;left:0;right:0;
-    background:rgba(23,21,27,.99);
+    background:rgba(23,21,27,.85);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
     padding:8px 24px 18px;border-bottom:1px solid rgba(255,255,255,.1);
     box-shadow:0 16px 30px -12px rgba(0,0,0,.5);
   }
@@ -551,10 +556,10 @@
       <h2>Our Specialization: Listing and Selling Your Property</h2>
       <p class="desc">While many agencies focus on collecting listings, Al Awafi’s approach is different: we present your property or land to genuine, qualified buyers and manage the transaction through to closing.</p>
       <ul class="check-list">
-        <li><b>Buyer inquiries are pre-qualified</b> — every inquiry is screened before it reaches you.</li>
-        <li><b>Only serious buyers are presented</b> — we do not forward speculative or unqualified inquiries.</li>
-        <li><b>Consistent, professional marketing</b> — your listing is presented to a high standard from day one.</li>
-        <li><b>Viewings fully managed</b> — we schedule, conduct and follow up on every visit.</li>
+        <li><div class="ck-text"><b>Buyer inquiries are pre-qualified</b><span class="ck-sub">Every inquiry is screened before it reaches you.</span></div></li>
+        <li><div class="ck-text"><b>Only serious buyers are presented</b><span class="ck-sub">We do not forward speculative or unqualified inquiries.</span></div></li>
+        <li><div class="ck-text"><b>Consistent, professional marketing</b><span class="ck-sub">Your listing is presented to a high standard from day one.</span></div></li>
+        <li><div class="ck-text"><b>Viewings fully managed</b><span class="ck-sub">We schedule, conduct and follow up on every visit.</span></div></li>
       </ul>
       <div class="badge-row">
         <span class="badge">🏢 Villas &amp; Apartments</span>
@@ -1030,7 +1035,7 @@
     </div>
     <div class="footer-bottom">
       <span>© <span id="year"></span> Al Awafi Real Estate LLC OPC. All rights reserved.</span>
-      <a href="index-ar.html">🌐 View in Arabic — عربي</a>
+      <a href="../index.html">🌐 View in Arabic — عربي</a>
     </div>
   </div>
 </footer>

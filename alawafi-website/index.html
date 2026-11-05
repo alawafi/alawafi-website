@@ -64,7 +64,7 @@
   }
   .btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 34px -10px rgba(91,46,145,.7);background-position:100% 0%;}
   .btn-primary:active{transform:translateY(0) scale(.98);box-shadow:0 8px 18px -8px rgba(91,46,145,.6);}
-  .btn-ghost{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.35);}
+  .btn-ghost{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
   .btn-ghost:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.55);transform:translateY(-2px);}
   .btn-outline{background:transparent;color:var(--purple);border-color:var(--purple);}
   .btn-outline:hover{background:var(--purple);color:#fff;transform:translateY(-2px);box-shadow:0 12px 26px -10px rgba(91,46,145,.5);}
@@ -91,11 +91,12 @@
   /* NAV */
   header{
     position:fixed;top:0;left:0;right:0;z-index:1000;
-    background:rgba(20,15,30,.88);
+    background:rgba(20,15,30,.72);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     border-bottom:1px solid rgba(255,255,255,.08);
     transition:background .3s,border-color .3s;
   }
-  header.scrolled{background:rgba(20,15,30,.97);border-bottom-color:rgba(255,255,255,.12);}
+  header.scrolled{background:rgba(20,15,30,.88);border-bottom-color:rgba(255,255,255,.12);}
   nav{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;max-width:1180px;margin:0 auto;}
   .logo{display:flex;align-items:center;gap:10px;color:#fff;font-size:1.22rem;font-weight:700;}
   .logo .mark{
@@ -137,6 +138,7 @@
 
   .hero-card{
     background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
     border-radius:var(--radius-lg);padding:30px;color:#fff;
   }
   .hero-card h3{font-size:1.2rem;margin-bottom:8px;font-weight:700;}
@@ -174,8 +176,15 @@
   .split h2{font-size:clamp(1.6rem,3vw,2.2rem);margin-bottom:18px;}
   .split p.desc{color:var(--grey-600);margin-bottom:24px;}
   .check-list{list-style:none;}
-  .check-list li{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;font-size:.98rem;color:var(--grey-800);}
+  .check-list li{display:flex;gap:14px;align-items:flex-start;margin-bottom:20px;font-size:.98rem;color:var(--grey-800);}
+  .check-list li::before{
+    content:"✓";flex:0 0 26px;width:26px;height:26px;border-radius:50%;
+    background:var(--purple);color:#fff;font-size:.78rem;font-weight:700;
+    display:flex;align-items:center;justify-content:center;margin-top:2px;
+  }
+  .check-list li .ck-text{display:flex;flex-direction:column;gap:3px;}
   .check-list li b{color:var(--purple-dark);}
+  .check-list li .ck-sub{color:var(--grey-600);font-size:.92rem;}
   .badge-row{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap;}
   .badge{background:var(--bg-alt);border-radius:999px;padding:10px 20px;font-size:.85rem;font-weight:600;color:var(--grey-800);}
 
@@ -241,6 +250,7 @@
 
   .wizard-card{
     background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
     border-radius:var(--radius);padding:36px 32px;
   }
   .wz-step{display:none;animation:fade .35s ease;}
@@ -380,7 +390,8 @@
   .nav-links.mobile-open{
     display:flex !important;flex-direction:column;align-items:stretch;gap:0;
     position:absolute;top:100%;left:0;right:0;
-    background:rgba(23,21,27,.99);
+    background:rgba(23,21,27,.85);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
     padding:8px 24px 18px;border-bottom:1px solid rgba(255,255,255,.1);
     box-shadow:0 16px 30px -12px rgba(0,0,0,.5);
   }
@@ -534,10 +545,10 @@
       <h2>تخصصنا: إدراج عقارك وبيعه فعلياً</h2>
       <p class="desc">في حين تكتفي مكاتب كثيرة بجمع الإعلانات، يختلف نهج العوافي: نعرض عقارك أو أرضك على مشترين حقيقيين ومؤهّلين، وندير الصفقة حتى إتمامها بالكامل.</p>
       <ul class="check-list">
-        <li><b>تأهيل مسبق لجميع الاستفسارات</b> — يُفحص كل استفسار قبل وصوله إليك.</li>
-        <li><b>عرض المشترين الجادين فقط</b> — لا نُحيل إليك استفسارات غير جادة أو غير مؤهّلة.</li>
-        <li><b>تسويق احترافي ومتّسق</b> — يُعرض إعلانك بمستوى احترافي منذ اليوم الأول.</li>
-        <li><b>إدارة كاملة للمعاينات</b> — نُجدول وندير ونُتابع كل زيارة نيابة عنك.</li>
+        <li><div class="ck-text"><b>تأهيل مسبق لجميع الاستفسارات</b><span class="ck-sub">يُفحص كل استفسار قبل وصوله إليك.</span></div></li>
+        <li><div class="ck-text"><b>عرض المشترين الجادين فقط</b><span class="ck-sub">لا نُحيل إليك استفسارات غير جادة أو غير مؤهّلة.</span></div></li>
+        <li><div class="ck-text"><b>تسويق احترافي ومتّسق</b><span class="ck-sub">يُعرض إعلانك بمستوى احترافي منذ اليوم الأول.</span></div></li>
+        <li><div class="ck-text"><b>إدارة كاملة للمعاينات</b><span class="ck-sub">نُجدول وندير ونُتابع كل زيارة نيابة عنك.</span></div></li>
       </ul>
       <div class="badge-row">
         <span class="badge">🏢 فلل وشقق</span>
@@ -1014,7 +1025,7 @@
     </div>
     <div class="footer-bottom">
       <span>© <span id="year"></span> العوافي للعقارات ذ.م.م. جميع الحقوق محفوظة.</span>
-      <a href="index.html">🌐 View in English</a>
+      <a href="en/index.html">🌐 View in English</a>
     </div>
   </div>
 </footer>
